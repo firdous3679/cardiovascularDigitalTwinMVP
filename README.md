@@ -127,3 +127,18 @@ After running `make run`, `make synth`, and `make update`, the pipeline writes:
 - `src/twin/sim/hemodynamics_stub.py` — mechanistic placeholder simulator stub
 - `app/streamlit_app.py` — Streamlit dashboard
 - `tests/` — unit and smoke tests
+
+## Mini-MAS CPS traffic twin slice
+
+The repository now includes a lightweight smart-city CPS digital twin slice in `mini_mesa_LSC.py`. It emits `cps_command` events (e.g., `PUSH_TIMING_PLAN`, `TWEAK_OFFSET`, `ROLLBACK_PLAN`) and a per-step `cps_service_state` event with `actor_id=-1`, degraded status, severity, and causal actor attribution.
+
+The threshold sweep computes three impact-aware TEST-phase metrics in addition to the existing detection metrics:
+- **IW-TTD (steps):** impact-weighted time-to-detection across malicious actors, weighted by CPS severity (or scenario fallback impacts).
+- **SDP:** service disruption probability, i.e., fraction of runs where degraded mode occurs at least once in TEST.
+- **Avg degraded-mode duration (steps):** average contiguous degraded-episode length in TEST.
+
+Run the sweep with:
+
+```bash
+python sweep_thresholds_ablation_LSC.py --model mini_mesa_LSC.py --out threshold_sweep_ablation_LSC.csv --seeds 10 --warmup_steps 60 --test_steps 240 --threshold_min 3 --threshold_max 7
+```
